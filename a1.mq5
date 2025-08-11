@@ -1,0 +1,121 @@
+//+------------------------------------------------------------------+
+//|                                                           a1.mq5 |
+//|                                                      pebriantara |
+//|                                    https://www.pebriantara.my.id |
+//+----s--------------------------------------------------------------+
+#property copyright "pebriantara"
+#property link      "https://www.pebriantara.my.id"
+#property version   "1.00"
+
+#include <Trade\Trade.mqh>
+CTrade trade;
+
+void OnTick()
+  {
+   // get Ask Price
+    double Ask = NormalizeDouble(SymbolInfoDouble(_Symbol,SYMBOL_ASK),_Digits);
+
+    // create array for the price
+    MqlRates PriceInfo[];
+
+    // Sort the price array from the current candle downward
+    ArraySetAsSeries(PriceInfo, true);
+
+    // find array with the price data
+    int PriceData = CopyRates(_Symbol, _Period,0,3,PriceInfo);
+
+    // when the candle is bullish
+    // if(PriceInfo[1].close > PriceInfo[1].open){
+
+    // }
+
+    // if we have no position
+    // if(PositionsTotal()==0){
+    //   trade.Buy(
+    //     0.01, // lots
+    //     NULL, // current symbol
+    //     Ask, // buy price
+    //     Ask-300*_Point, // stop loss
+    //     Ask+500*_Point, // take profit
+    //     "O rder Buy pebriantara"); // comment
+    // }
+
+// if(PositionsTotal()==0){
+//       trade.Buy(
+//         0.01, // lots
+//         NULL, // current symbol
+//         Ask, // buy price
+//         Ask-300*_Point, // stop loss
+//         Ask+500*_Point, // take profit
+//         "O rder Buy pebriantara"); 
+// }
+
+      // if(PositionsTotal()==0){
+      //   trade.BuyStop(
+      //     0.01, // lots
+      //     Ask+50*_Point, // buy price
+      //     NULL, // current symbol
+      //     Ask-50*_Point, // stop loss
+      //     Ask+200*_Point, // take profit
+      //     ORDER_TIME_GTC, // order lifetime
+      //     0, // order expiration time
+      //     "O rder Buy pebriantara");
+      // }
+
+      // if(PositionsTotal()==0){
+      //   trade.BuyStop(
+      //     0.01, // lots
+      //     Ask+50*_Point, // buy price
+      //     NULL, // current symbol
+      //     0, // stop loss
+      //     0, // take profit
+      //     ORDER_TIME_GTC, // order lifetime
+      //     0, // order expiration time
+      //     "O rder Buy pebriantara");
+      // }
+
+      // closeAllPositions();
+
+      // pending order di atas harga
+      static datetime dtBarCurrent  = WRONG_VALUE;
+      datetime dtBarPrevious = dtBarCurrent;
+      dtBarCurrent  = iTime( _Symbol, _Period, 0 );
+      bool     bNewBarEvent  = ( dtBarCurrent != dtBarPrevious );
+
+      if(bNewBarEvent){
+        closeAllPositions();
+        if(PositionsTotal()<10){
+      }
+
+        int count = 0;
+        double p_gapBuy = 20;
+        double poin_tambah = 0;
+        double Ask_buy = 75;
+        // for (int i = 8; i > count; i++)
+        // {        
+          // Ask_buy = (Ask_buy+poin_tambah)*_Point;
+          // poin_tambah = 20+poin_tambah;
+          // double tp_buy = ((Ask_buy/_Point)+100)*_Point;
+  
+          trade.BuyStop(
+            0.01, // lots
+            Ask+75*_Point, // buy price
+            NULL, // current symbol
+            0, // stop loss
+            Ask+95*_Point, // take profit
+            ORDER_TIME_GTC, // order lifetime
+            0, // order expiration time
+            "Order By pebriantara");    
+        // }     
+
+      }
+
+    
+}
+
+void closeAllPositions(){
+  for(int i=PositionsTotal()-1; i>=0; i++){
+    ulong ticket = PositionGetTicket(i);
+    trade.PositionClose(ticket);
+  }
+}
