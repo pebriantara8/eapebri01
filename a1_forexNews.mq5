@@ -44,11 +44,8 @@ void OnTick()
   if (bNewBarEvent)
   {
     DeletePendingOrder();
-    // MqlDateTime tm = {};
-    // datetime time22 = TimeCurrent(tm);
-    // Print("WAKTU TANGGAL = " + tm.day);
-    datetime time1 = D '2025.08.11 17:34';
-    datetime time2 = D '2025.08.11 17:36';
+    datetime time1 = D'2025.08.18 15:59';
+    datetime time2 = D'2025.08.18 16:01';
     if (TimeCurrent() > time1 && TimeCurrent() < time2)
     {
       if (PositionsTotal() <= 0)
@@ -59,25 +56,33 @@ void OnTick()
         double TPSell = lowPri - 1200 * _Point;
         double SLSell = lowPri - 500 * _Point;
 
-        trade.BuyStop(
-            0.1,                     // lots
-            highPri + 1000 * _Point, // buy price
-            NULL,                    // current symbol
-            SLBuy,                   // stop loss
-            TPBuy,                   // take profit
-            ORDER_TIME_GTC,          // order lifetime
-            0,                       // order expiration time
-            "Buy Stop By pebriantara");
+        // trade.BuyStop(
+        //     0.05,                   // lots
+        //     highPri + 500 * _Point, // buy price
+        //     NULL,                   // current symbol
+        //     0,                      // stop loss
+        //     0,                      // take profit
+        //     ORDER_TIME_GTC,         // order lifetime
+        //     0,                      // order expiration time
+        //     "Buy Stop By pebriantara");
 
         trade.SellStop(
-            0.01,                   // lots
-            lowPri - 1000 * _Point, // price
-            NULL,                   // current symbol
-            SLSell,                 // stop loss
-            TPSell,                 // take profit
-            ORDER_TIME_GTC,         // order lifetime
-            0,                      // order expiration time
+            0.05,                // lots
+            lowPri - 2 * _Point, // price
+            NULL,                // current symbol
+            0,                   // stop loss
+            0,                   // take profit
+            ORDER_TIME_GTC,      // order lifetime
+            0,                   // order expiration time
             "Sell Stop By pebriantara");
+
+        // trade.Buy(
+        //     0.01, // lots
+        //     NULL, // current symbol
+        //     Ask,  // buy price
+        //     0,    // stop loss
+        //     0,    // take profit
+        //     "Buy Order pebriantara");
       }
     }
   }
@@ -90,27 +95,58 @@ void OnTick()
 
     if (PositionGetTicket(0))
     {
-      Print("POSITION TYPE INI BRO= " + PositionGetInteger(POSITION_TYPE));
-      // CEK APAKAH POSITION BUY
-      // if((ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE))
-      if (Ask > PositionGetDouble(POSITION_TP) - 100 * _Point)
+      // CEK APA ADA UPDATE POSISI
+      datetime n = (datetime)PositionGetInteger(POSITION_TIME);
+      datetime nUpdate = (datetime)PositionGetInteger(POSITION_TIME_UPDATE);
+      double SLNew = 0;
+      // Print("NNNNNNNNNN = " + n);
+      // Print("NNNNNNNNNN UPDATE = " + nUpdate);
+      if (n != nUpdate)
       {
-        // CEK APA ADA UPDATE POSISI
-        // datetime n = (datetime)PositionGetInteger(POSITION_TIME);
-        // datetime nUpdate = (datetime)PositionGetInteger(POSITION_TIME_UPDATE);
-
-        // Print(nUpdate + " ===== " + n);
-        // double SLNew = highPri + 1200 * _Point;
-        // if (n != nUpdate)
-        // {
-        //   SLNew = PositionGetDouble(POSITION_SL) + 100 * _Point;
-        // }
-
-        double SLNew = PositionGetDouble(POSITION_SL) + 100 * _Point;
-        sTrade.PositionModify(
-            PositionGetInteger(POSITION_TICKET),
-            SLNew,
-            PositionGetDouble(POSITION_TP) + 100 * _Point);
+        // Print("SLLLLL UPDATEEEEEEEEE");
+        // JIKA SL KURANG DARI SL SEKARANG, JANGAN UBAH SL
+        SLNew = Ask - 2 * _Point;
+        if (SLNew < PositionGetDouble(POSITION_SL))
+        {
+          SLNew = Ask + 2 * _Point;
+          sTrade.PositionModify(
+              PositionGetInteger(POSITION_TICKET),
+              SLNew,
+              0);
+        }
+        else
+        {
+          // SLNew = PositionGetDouble(POSITION_SL);
+        }
+      }
+      else
+      {
+        // CEK APAKAH ADA TAMBAHAN SL JIKA HARGA MENYENTUH HARGAS ASK TERTENTU
+        if (PositionGetDouble(POSITION_PRICE_OPEN) > Ask - 4 * _Point)
+        {
+          // Print("UPDATE SL PERTAMAAAAA");
+          SLNew = Ask + 2 * _Point;
+          sTrade.PositionModify(
+              PositionGetInteger(POSITION_TICKET),
+              SLNew,
+              0);
+        }
+      }
+      // Print("POSITION TYPE INI BRO= " + (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE));
+      double hargaOpenPosisi = PositionGetDouble(POSITION_PRICE_OPEN);
+      long posisiTipe = PositionGetInteger(POSITION_TYPE);
+      // CEK APAKAH POSITION BUY
+      if (posisiTipe = 1)
+      {
+        // Print("SELLLL OPENNNNNN SELLL");
+        // double SLNew = PositionGetDouble(POSITION_SL) + 100 * _Point;
+        // sTrade.PositionModify(
+        //     PositionGetInteger(POSITION_TICKET),
+        //     SLNew,
+        //     0);
+      }
+      if (Ask > PositionGetDouble(POSITION_PRICE_OPEN) - 4 * _Point)
+      {
       }
     }
   }
