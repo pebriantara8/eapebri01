@@ -90,10 +90,6 @@ void OnTick()
 
   if (bNewBarEvent)
   {
-    closeAllPositions();
-    if (PositionsTotal() < 10)
-    {
-    }
 
     int count = 0;
     double p_gapBuy = 20;
@@ -112,29 +108,59 @@ void OnTick()
     double lowPri = iLow(Symbol(), 0, 1);
 
     // JIKA CANDLE NAIK
-    if (openPri < closePri)
+    // if (openPri < closePri)
+    // {
+    //   if ((highPri - closePri) < (openPri - lowPri))
+    //   {
+    //     buyStopA();
+    //   }
+    // }
+
+    // BUY JIKA NOW PRICE LEBIH TINGGI DARI HIGH CANDLE
+
+    if (PositionsTotal() < 1)
     {
-      if ((highPri - closePri) < (openPri - lowPri))
-      {
-        buyStopA();
-      }
-      // Print("IOPEN=" + iOpen(_Symbol, 0, 1));
+      // Print("higtPri=" + highPri + "-------Ask=" + Ask);
+      // buyA();
+      trade.BuyStop(
+          0.01,                    // lots
+          highPri + 50 * _Point,   // buy price
+          NULL,                    // current symbol
+          highPri - 9000 * _Point, // stop loss
+          highPri + 500 * _Point,  // take profit
+          ORDER_TIME_GTC,          // order lifetime
+          0,                       // order expiration time
+          "Buy Stop By pebriantara");
     }
     else
     {
-      // sellStopA();
+      closeAllPositions();
     }
-    // if (Open[] < Close[1])
-    // {
-    //   buyStopA();
-    // }
-    // if (Open[1] > Close[1])
-    // {
-    //   sellStopA();
-    // }
-
-    // }
   }
+}
+
+void buyA()
+{
+  double Ask = NormalizeDouble(SymbolInfoDouble(_Symbol, SYMBOL_ASK), _Digits);
+  trade.Buy(
+      0.01, // lots
+      NULL, // current symbol
+      Ask,  // buy price
+      0,    // stop loss
+      0,    // take profit
+      "O rder Buy pebriantara");
+}
+
+void sellA()
+{
+  double Bid = NormalizeDouble(SymbolInfoDouble(_Symbol, SYMBOL_BID), _Digits);
+  trade.Sell(
+      0.01,               // lots
+      NULL,               // current symbol
+      Bid,                // buy price
+      Bid + 100 * _Point, // stop loss
+      Bid - 120 * _Point, // take profit
+      "O rder Buy pebriantara");
 }
 
 void buyStopA()
