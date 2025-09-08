@@ -1,0 +1,8 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "*.blade.php": "html",
+        "*.tpl": "html",
+        "*.mq5": "cpp"
+    }
+}
