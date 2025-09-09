@@ -9,12 +9,12 @@
 
 #include <Trade\Trade.mqh>
 CTrade trade;
-CTrade sTrade;
+// CTrade sTrade;
 // trade.SetAsyncMode(true);
-input double pointChangeOpen = 100;
-input double pointSL = 500;
-input double pointSLFirstRunning = 300;
-input double pointSLDiffRunning = 200;
+input double pointChangeOpen = 170;
+input double pointSL = 300;
+input double pointSLFirstRunning = 100;
+input double pointSLDiffRunning = 100;
 
 void OnTick()
 {
@@ -46,11 +46,11 @@ void OnTick()
   bool newBalanceA = (balanceCurrentA != balancePreviousA);
 
   // TENTUKAN RANGE WAKTU BACKTEST
-  // datetime time1 = D'2025.09.01 01:00';
-  datetime time2 = D '2025.09.01 23:00';
-  if (TimeCurrent() > time2)
+  // datetime time1 = D'2025.09.01 01:57';
+  // datetime time2 = D'2025.09.01 02:13';
+  // if (TimeCurrent() > time2)
   // if (TimeCurrent() > time1 && TimeCurrent() < time2)
-  {
+  // {
     // JIKA TIDAK ADA POSISI TERBUKA
     if (PositionsTotal() <= 0)
     {
@@ -64,11 +64,16 @@ void OnTick()
       else
       {
         // Print("TIDAKKKKKKK ADAA GLOBAL VARIABEL");
-        GlobalVariableSet("priceTerakhirSL", (double)Ask);
+        GlobalVariableSet("priceTerakhirSL", Ask);
+        // Print("ADA GLOBAL VARIABEL" + GlobalVariableGet("priceTerakhirSL"));
       }
+
 
       if (Ask <= (GlobalVariableGet("priceTerakhirSL") - (pointChangeOpen * _Point)))
       {
+        // Print("ASK = " + Ask);
+        // Print("bid = " + Bid);
+        // Print("ASK LAST = " + GlobalVariableGet("priceTerakhirSL"));
         trade.Sell(
             0.1,                      // lots
             NULL,                     // current symbol
@@ -85,12 +90,11 @@ void OnTick()
             Ask,                      // sell price
             Ask - (pointSL * _Point), // stop loss
             0,                        // take profit
-            "Sell ea");
+            "Buy ea");
       }
     }
     else
     {
-
       // APABILA ADA POSISI TERBUKA
       if (!PositionGetTicket(0))
       {
@@ -105,65 +109,83 @@ void OnTick()
         double posisiCurrentPrice = PositionGetDouble(POSITION_PRICE_CURRENT);
         double posisiTP = PositionGetDouble(POSITION_TP);
         double posisiSL = PositionGetDouble(POSITION_SL);
-        double SLNew = posisiSL;
+        double SLNew = 0;
+        GlobalVariableSet("priceTerakhirSL", posisiSL);
 
         // JIKA ADA UPDATE POSISI
-        if (n == nUpdate)
+        // Print("n === " + n);
+        // Print("nUpdate === " + nUpdate);
+        // JIKA SUDAH DIMODIF MAKAN RUNNING STOP LOSS
+        if (n != nUpdate)
         {
-          // JIKA POSISI BUY
-          if (posisiType == 0)
+          CTrade sTrade;
+          // JIKA SUDAH ADA UPDATE POSISI
+          Print("SL KEDUA");
+          Print("ASK == " + Ask);
+          Print("posisiCurrentPrice == " + posisiCurrentPrice);
+          // Print("FROM = "+posisiSL + " TO = " + SLNew);
+          if (posisiType == 0 && posisiCurrentPrice >= posisiSL + pointSLDiffRunning * _Point)
           {
-            if (posisiCurrentPrice >= posisiOpenPrice + pointSLFirstRunning * _Point)
-            {
-              Print("SL UPDATE PERTAMA");
-              SLNew = posisiCurrentPrice - pointSLDiffRunning * _Point;
+            SLNew = posisiCurrentPrice - pointSLDiffRunning * _Point;
+            if(SLNew>posisiSL){
               sTrade.PositionModify(
                   PositionGetInteger(POSITION_TICKET),
                   SLNew,
                   0);
+              GlobalVariableSet("priceTerakhirSL", SLNew);
+            }
+          }
+          if (posisiType == 1 && posisiCurrentPrice <= posisiSL - pointSLDiffRunning * _Point)
+          {
+            Print("SL UPDATE KEDUA");
+            SLNew = posisiCurrentPrice + pointSLDiffRunning * _Point;
+            sTrade.PositionModify(
+                PositionGetInteger(POSITION_TICKET),
+                SLNew,
+                0);
+            GlobalVariableSet("priceTerakhirSL", SLNew);
+          }
+        }
+        else
+        {
+          // Print("TIDAK UPDATE");
+          CTrade sTrade;
+          // JIKA POSISI BUY
+          if (posisiType == 0)
+          {
+            // Print("Posisi Open Price ======" + posisiOpenPrice);
+            if (posisiCurrentPrice >= posisiOpenPrice + (pointSLFirstRunning * _Point))
+            {
+              Print("BUY UPDATE PERTAMA");
+              SLNew = posisiCurrentPrice - (pointSLDiffRunning * _Point);
+              if(SLNew>posisiSL){
+                sTrade.PositionModify(
+                    PositionGetInteger(POSITION_TICKET),
+                    SLNew,
+                    0);
+              }
               GlobalVariableSet("priceTerakhirSL", SLNew);
             }
           }
           if (posisiType == 1)
           {
-            if (posisiCurrentPrice <= posisiOpenPrice - pointSLFirstRunning * _Point)
+            // Print("Posisi Open Price ======" + posisiOpenPrice);
+            if (posisiCurrentPrice <= posisiOpenPrice - (pointSLFirstRunning * _Point))
             {
               Print("SL UPDATE PERTAMA");
-              SLNew = posisiCurrentPrice + pointSLDiffRunning * _Point;
-              sTrade.PositionModify(
-                  PositionGetInteger(POSITION_TICKET),
-                  SLNew,
-                  0);
+              SLNew = posisiCurrentPrice + (pointSLDiffRunning * _Point);
+              if(SLNew<posisiSL){
+                sTrade.PositionModify(
+                    PositionGetInteger(POSITION_TICKET),
+                    SLNew,
+                    0);
+              }
               GlobalVariableSet("priceTerakhirSL", SLNew);
             }
           }
         }
-        else
-        {
-          // JIKA SUDAH ADA UPDATE POSISI
-          // if (posisiType == 0 && posisiCurrentPrice >= posisiSL + pointSLDiffRunning * _Point)
-          // {
-          //   Print("SL UPDATE KEDUA");
-          //   SLNew = posisiCurrentPrice - pointSLDiffRunning * _Point;
-          //   sTrade.PositionModify(
-          //       PositionGetInteger(POSITION_TICKET),
-          //       SLNew,
-          //       0);
-          //   GlobalVariableSet("priceTerakhirSL", SLNew);
-          // }
-          // if (posisiType == 1 && posisiCurrentPrice <= posisiSL - pointSLDiffRunning * _Point)
-          // {
-          //   Print("SL UPDATE KEDUA");
-          //   SLNew = posisiCurrentPrice + pointSLDiffRunning * _Point;
-          //   sTrade.PositionModify(
-          //       PositionGetInteger(POSITION_TICKET),
-          //       SLNew,
-          //       0);
-          //   GlobalVariableSet("priceTerakhirSL", SLNew);
-          // }
-        }
       }
-    }
+    // }
   }
 }
 
@@ -171,7 +193,7 @@ void closeAllPositions()
 {
   ulong st = GetMicrosecondCount();
 
-  // CTrade sTrade;
+  CTrade sTrade;
   sTrade.SetAsyncMode(true); // true:Async, false:Sync
 
   for (int cnt = PositionsTotal() - 1; cnt >= 0 && !IsStopped(); cnt--)
