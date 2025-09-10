@@ -15,6 +15,7 @@ input double pointChangeOpen = 170;
 input double pointSL = 300;
 input double pointSLFirstRunning = 100;
 input double pointSLDiffRunning = 100;
+input double lotA = 0.1;
 
 void OnTick()
 {
@@ -47,10 +48,10 @@ void OnTick()
 
   // TENTUKAN RANGE WAKTU BACKTEST
   // datetime time1 = D'2025.09.01 01:57';
-  // datetime time2 = D'2025.09.01 02:13';
-  // if (TimeCurrent() > time2)
+  datetime time2 = D'2025.09.02 01:13';
+  if (TimeCurrent() > time2)
   // if (TimeCurrent() > time1 && TimeCurrent() < time2)
-  // {
+  {
     // JIKA TIDAK ADA POSISI TERBUKA
     if (PositionsTotal() <= 0)
     {
@@ -74,21 +75,21 @@ void OnTick()
         // Print("ASK = " + Ask);
         // Print("bid = " + Bid);
         // Print("ASK LAST = " + GlobalVariableGet("priceTerakhirSL"));
-        trade.Sell(
-            0.1,                      // lots
+        trade.Buy(
+            lotA,                      // lots
             NULL,                     // current symbol
-            Bid,                      // sell price
-            Bid + (pointSL * _Point), // stop loss
+            Ask,                      // sell price
+            Ask - (pointSL * _Point), // stop loss
             0,                        // take profit
             "Sell ea");
       }
       if (Ask >= (GlobalVariableGet("priceTerakhirSL") + (pointChangeOpen * _Point)))
       {
-        trade.Buy(
-            0.1,                      // lots
+        trade.Sell(
+            lotA,                      // lots
             NULL,                     // current symbol
-            Ask,                      // sell price
-            Ask - (pointSL * _Point), // stop loss
+            Bid,                      // sell price
+            Bid + (pointSL * _Point), // stop loss
             0,                        // take profit
             "Buy ea");
       }
@@ -110,7 +111,7 @@ void OnTick()
         double posisiTP = PositionGetDouble(POSITION_TP);
         double posisiSL = PositionGetDouble(POSITION_SL);
         double SLNew = 0;
-        GlobalVariableSet("priceTerakhirSL", posisiSL);
+        GlobalVariableSet("priceTerakhirSL", Ask);
 
         // JIKA ADA UPDATE POSISI
         // Print("n === " + n);
@@ -120,9 +121,9 @@ void OnTick()
         {
           CTrade sTrade;
           // JIKA SUDAH ADA UPDATE POSISI
-          Print("SL KEDUA");
-          Print("ASK == " + Ask);
-          Print("posisiCurrentPrice == " + posisiCurrentPrice);
+          // Print("SL KEDUA");
+          // Print("ASK == " + Ask);
+          // Print("posisiCurrentPrice == " + posisiCurrentPrice);
           // Print("FROM = "+posisiSL + " TO = " + SLNew);
           if (posisiType == 0 && posisiCurrentPrice >= posisiSL + pointSLDiffRunning * _Point)
           {
@@ -132,18 +133,18 @@ void OnTick()
                   PositionGetInteger(POSITION_TICKET),
                   SLNew,
                   0);
-              GlobalVariableSet("priceTerakhirSL", SLNew);
+              GlobalVariableSet("priceTerakhirSL", Ask);
             }
           }
           if (posisiType == 1 && posisiCurrentPrice <= posisiSL - pointSLDiffRunning * _Point)
           {
-            Print("SL UPDATE KEDUA");
+            // Print("SL UPDATE KEDUA");
             SLNew = posisiCurrentPrice + pointSLDiffRunning * _Point;
             sTrade.PositionModify(
                 PositionGetInteger(POSITION_TICKET),
                 SLNew,
                 0);
-            GlobalVariableSet("priceTerakhirSL", SLNew);
+            GlobalVariableSet("priceTerakhirSL", Ask);
           }
         }
         else
@@ -164,7 +165,7 @@ void OnTick()
                     SLNew,
                     0);
               }
-              GlobalVariableSet("priceTerakhirSL", SLNew);
+              GlobalVariableSet("priceTerakhirSL", Ask);
             }
           }
           if (posisiType == 1)
@@ -180,12 +181,12 @@ void OnTick()
                     SLNew,
                     0);
               }
-              GlobalVariableSet("priceTerakhirSL", SLNew);
+              GlobalVariableSet("priceTerakhirSL", Ask);
             }
           }
         }
       }
-    // }
+    }
   }
 }
 
