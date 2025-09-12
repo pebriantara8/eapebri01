@@ -151,69 +151,23 @@ void OnTick()
 
   if (PositionsTotal() <= 0)
   {
-    trade.Buy(
-        0.01, // lots
-        NULL, // current symbol
-        Ask,  // buy price
-        0,    // stop loss
-        0,    // take profit
-        "Buy ea");
+    // trade.Buy(
+    //     0.01, // lots
+    //     NULL, // current symbol
+    //     Ask,  // buy price
+    //     0,    // stop loss
+    //     0,    // take profit
+    //     "Buy ea");
 
-    trade.Sell(
-        0.01, // lots
-        NULL, // current symbol
-        Ask,  // buy price
-        0,    // stop loss
-        0,    // take profit
-        "Sell ea");
+    // trade.Sell(
+    //     0.01, // lots
+    //     NULL, // current symbol
+    //     Ask,  // buy price
+    //     0,    // stop loss
+    //     0,    // take profit
+    //     "Sell ea");
   }
   // }
-}
-
-void tambahPosisiReverse(double lotA, double minusA)
-{
-  double Ask = NormalizeDouble(SymbolInfoDouble(_Symbol, SYMBOL_ASK), _Digits);
-  //--- SELECT POSITION BUY
-  if (!PositionGetTicket(0))
-  {
-    Print("ERROR - failed to SELECT POSITION with ticket #0 POSISI 0");
-  }
-  else
-  {
-    // TAMBAH POSISI JIKA
-    double pP = PositionGetDouble(POSITION_PROFIT);
-    if (pP <= minusA)
-    {
-      // Print("POSITION PROFITNYAAAA:" +PositionsTotal());
-      trade.Sell(
-          lotA, // lots
-          NULL, // current symbol
-          Ask,  // buy price
-          0,    // stop loss
-          0,    // take profit
-          "Buy ea");
-    }
-  }
-  if (!PositionGetTicket(1))
-  {
-    Print("ERROR - failed to SELECT POSITION with ticket #0 POSISI 0");
-  }
-  else
-  {
-    // TAMBAH POSISI JIKA
-    double pP = PositionGetDouble(POSITION_PROFIT);
-    if (pP <= minusA)
-    {
-      trade.Buy(
-          lotA, // lots
-          NULL, // current symbol
-          Ask,  // buy price
-          0,    // stop loss
-          0,    // take profit
-          "Sell ea");
-    }
-  }
-  return;
 }
 
 void tambahPosisi(double lotA, double minusA)
@@ -227,36 +181,31 @@ void tambahPosisi(double lotA, double minusA)
   else
   {
     // TAMBAH POSISI JIKA
+    ENUM_POSITION_TYPE posisiType = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);
     double pP = PositionGetDouble(POSITION_PROFIT);
     if (pP <= minusA)
     {
-      // Print("POSITION PROFITNYAAAA:" +PositionsTotal());
-      trade.Buy(
-          lotA, // lots
-          NULL, // current symbol
-          Ask,  // buy price
-          0,    // stop loss
-          0,    // take profit
-          "Buy ea");
-    }
-  }
-  if (!PositionGetTicket(1))
-  {
-    Print("ERROR - failed to SELECT POSITION with ticket #0 POSISI 0");
-  }
-  else
-  {
-    // TAMBAH POSISI JIKA
-    double pP = PositionGetDouble(POSITION_PROFIT);
-    if (pP <= minusA)
-    {
-      trade.Sell(
-          lotA, // lots
-          NULL, // current symbol
-          Ask,  // buy price
-          0,    // stop loss
-          0,    // take profit
-          "Sell ea");
+      if (posisiType == 0)
+      {
+        trade.Buy(
+            lotA, // lots
+            NULL, // current symbol
+            Ask,  // buy price
+            0,    // stop loss
+            0,    // take profit
+            "Sell ea");
+      }
+      else
+      {
+        // Print("POSITION PROFITNYAAAA:" +PositionsTotal());
+        trade.Sell(
+            lotA, // lots
+            NULL, // current symbol
+            Ask,  // buy price
+            0,    // stop loss
+            0,    // take profit
+            "Buy ea");
+      }
     }
   }
   return;
