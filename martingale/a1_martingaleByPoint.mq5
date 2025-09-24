@@ -11,6 +11,10 @@
 CTrade trade;
 // trade.SetAsyncMode(true);
 
+input double lotA = 0.01;
+input double pointRange = 200;
+input double profitDouble = true;
+
 void OnTick()
 {
   double openPri = iOpen(Symbol(), 0, 1);
